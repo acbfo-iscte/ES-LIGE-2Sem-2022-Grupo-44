@@ -1,1 +1,2 @@
 Olá texto teste para engenharia de software
+linha editada por jmpar-iscte
