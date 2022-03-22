@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.ibatis.submitted.result_handler_type.DefaultResultHandlerTypeTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s - in org.apache.ibatis.submitted.result_handler_type.DefaultResultHandlerTypeTest

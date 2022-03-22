@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.ibatis.session.SqlSessionTest
+-------------------------------------------------------------------------------
+Tests run: 59, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.676 s - in org.apache.ibatis.session.SqlSessionTest

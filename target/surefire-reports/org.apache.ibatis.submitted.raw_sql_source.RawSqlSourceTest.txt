@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.ibatis.submitted.raw_sql_source.RawSqlSourceTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s - in org.apache.ibatis.submitted.raw_sql_source.RawSqlSourceTest

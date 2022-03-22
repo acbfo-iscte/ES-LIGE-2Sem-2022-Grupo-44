@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.ibatis.submitted.cglib_lazy_error.CglibNPETest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.036 s - in org.apache.ibatis.submitted.cglib_lazy_error.CglibNPETest

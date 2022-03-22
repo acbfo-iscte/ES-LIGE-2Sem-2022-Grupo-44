@@ -8,7 +8,6 @@
 /.settings
 /nb*
 /release.properties
-/target
 
 # These are needed if running in IDE without properties set
 /ibderby

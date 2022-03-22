@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.ibatis.submitted.selectkey.SelectKeyTest
+-------------------------------------------------------------------------------
+Tests run: 21, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.287 s - in org.apache.ibatis.submitted.selectkey.SelectKeyTest
