@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.parsing;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -26,6 +27,7 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -230,7 +232,20 @@ public class XPathParser {
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      return createDocument1_extracted(inputSource);
+    } catch (Exception e) {
+      throw new BuilderException("Error creating document instance.  Cause: " + e, e);
+    }
+  }
+
+private Document createDocument1_extracted(InputSource inputSource)
+		throws ParserConfigurationException, SAXException, IOException {
+	return createDocument2_extracted(inputSource);
+}
+
+private Document createDocument2_extracted(InputSource inputSource)
+		throws ParserConfigurationException, SAXException, IOException {
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       factory.setValidating(validation);
 
@@ -259,10 +274,7 @@ public class XPathParser {
         }
       });
       return builder.parse(inputSource);
-    } catch (Exception e) {
-      throw new BuilderException("Error creating document instance.  Cause: " + e, e);
-    }
-  }
+}
 
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
