@@ -154,22 +154,10 @@ public class TypeParameterResolver {
 
   private static Type resolveTypeVar(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
     Type result;
-    Class<?> clazz;
-    if (srcType instanceof Class) {
-      clazz = (Class<?>) srcType;
-    } else if (srcType instanceof ParameterizedType) {
-      ParameterizedType parameterizedType = (ParameterizedType) srcType;
-      clazz = (Class<?>) parameterizedType.getRawType();
-    } else {
-      throw new IllegalArgumentException("The 2nd arg must be Class or ParameterizedType, but was: " + srcType.getClass());
-    }
+    Class<?> clazz = resolveTypeVar_extracted1(srcType);
 
     if (clazz == declaringClass) {
-      Type[] bounds = typeVar.getBounds();
-      if (bounds.length > 0) {
-        return bounds[0];
-      }
-      return Object.class;
+      return resolveTypevar_extracted2(typeVar);
     }
 
     Type superclass = clazz.getGenericSuperclass();
@@ -188,14 +176,33 @@ public class TypeParameterResolver {
     return Object.class;
   }
 
+private static Type resolveTypevar_extracted2(TypeVariable<?> typeVar) {
+	Type[] bounds = typeVar.getBounds();
+      if (bounds.length > 0) {
+        return bounds[0];
+      }
+      return Object.class;
+}
+
+private static Class<?> resolveTypeVar_extracted1(Type srcType) {
+	Class<?> clazz;
+    if (srcType instanceof Class) {
+      clazz = (Class<?>) srcType;
+    } else if (srcType instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) srcType;
+      clazz = (Class<?>) parameterizedType.getRawType();
+    } else {
+      throw new IllegalArgumentException("The 2nd arg must be Class or ParameterizedType, but was: " + srcType.getClass());
+    }
+	return clazz;
+}
+
   private static Type scanSuperTypes(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass, Class<?> clazz, Type superclass) {
     if (superclass instanceof ParameterizedType) {
       ParameterizedType parentAsType = (ParameterizedType) superclass;
       Class<?> parentAsClass = (Class<?>) parentAsType.getRawType();
       TypeVariable<?>[] parentTypeVars = parentAsClass.getTypeParameters();
-      if (srcType instanceof ParameterizedType) {
-        parentAsType = translateParentTypeVars((ParameterizedType) srcType, clazz, parentAsType);
-      }
+      parentAsType = scanSuperTypes_extracted1(srcType, clazz, parentAsType);
       if (declaringClass == parentAsClass) {
         for (int i = 0; i < parentTypeVars.length; i++) {
           if (typeVar.equals(parentTypeVars[i])) {
@@ -211,6 +218,14 @@ public class TypeParameterResolver {
     }
     return null;
   }
+
+private static ParameterizedType scanSuperTypes_extracted1(Type srcType, Class<?> clazz,
+		ParameterizedType parentAsType) {
+	if (srcType instanceof ParameterizedType) {
+        parentAsType = translateParentTypeVars((ParameterizedType) srcType, clazz, parentAsType);
+      }
+	return parentAsType;
+}
 
   private static ParameterizedType translateParentTypeVars(ParameterizedType srcType, Class<?> srcClass, ParameterizedType parentType) {
     Type[] parentTypeArgs = parentType.getActualTypeArguments();

@@ -39,7 +39,11 @@ public class ArrayUtil {
       return obj.hashCode();
     }
     final Class<?> componentType = clazz.getComponentType();
-    if (long.class.equals(componentType)) {
+    return hashCode_extracted1(obj, componentType);
+  }
+
+private static int hashCode_extracted1(Object obj, final Class<?> componentType) {
+	if (long.class.equals(componentType)) {
       return Arrays.hashCode((long[]) obj);
     } else if (int.class.equals(componentType)) {
       return Arrays.hashCode((int[]) obj);
@@ -58,7 +62,7 @@ public class ArrayUtil {
     } else {
       return Arrays.hashCode((Object[]) obj);
     }
-  }
+}
 
   /**
    * Compares two objects. Returns <code>true</code> if
@@ -90,7 +94,11 @@ public class ArrayUtil {
       return thisObj.equals(thatObj);
     }
     final Class<?> componentType = clazz.getComponentType();
-    if (long.class.equals(componentType)) {
+    return equals_extracted1(thisObj, thatObj, componentType);
+  }
+
+private static boolean equals_extracted1(Object thisObj, Object thatObj, final Class<?> componentType) {
+	if (long.class.equals(componentType)) {
       return Arrays.equals((long[]) thisObj, (long[]) thatObj);
     } else if (int.class.equals(componentType)) {
       return Arrays.equals((int[]) thisObj, (int[]) thatObj);
@@ -109,7 +117,7 @@ public class ArrayUtil {
     } else {
       return Arrays.equals((Object[]) thisObj, (Object[]) thatObj);
     }
-  }
+}
 
   /**
    * If the {@code obj} is an array, toString() method of {@link Arrays} is called. Otherwise
@@ -128,7 +136,11 @@ public class ArrayUtil {
       return obj.toString();
     }
     final Class<?> componentType = obj.getClass().getComponentType();
-    if (long.class.equals(componentType)) {
+    return toString_extracted1(obj, componentType);
+  }
+
+private static String toString_extracted1(Object obj, final Class<?> componentType) {
+	if (long.class.equals(componentType)) {
       return Arrays.toString((long[]) obj);
     } else if (int.class.equals(componentType)) {
       return Arrays.toString((int[]) obj);
@@ -147,6 +159,6 @@ public class ArrayUtil {
     } else {
       return Arrays.toString((Object[]) obj);
     }
-  }
+}
 
 }

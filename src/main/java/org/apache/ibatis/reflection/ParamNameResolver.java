@@ -67,14 +67,16 @@ public class ParamNameResolver {
         continue;
       }
       String name = null;
-      for (Annotation annotation : paramAnnotations[paramIndex]) {
-        if (annotation instanceof Param) {
-          hasParamAnnotation = true;
-          name = ((Param) annotation).value();
-          break;
-        }
-      }
-      if (name == null) {
+      name = paramNameResolver_extracted1(paramAnnotations, paramIndex, name);
+      name = paramNameResolver_extracted2(method, map, paramIndex, name);
+      map.put(paramIndex, name);
+    }
+    names = Collections.unmodifiableSortedMap(map);
+  }
+
+private String paramNameResolver_extracted2(Method method, final SortedMap<Integer, String> map, int paramIndex,
+		String name) {
+	if (name == null) {
         // @Param was not specified.
         if (useActualParamName) {
           name = getActualParamName(method, paramIndex);
@@ -85,10 +87,19 @@ public class ParamNameResolver {
           name = String.valueOf(map.size());
         }
       }
-      map.put(paramIndex, name);
-    }
-    names = Collections.unmodifiableSortedMap(map);
-  }
+	return name;
+}
+
+private String paramNameResolver_extracted1(final Annotation[][] paramAnnotations, int paramIndex, String name) {
+	for (Annotation annotation : paramAnnotations[paramIndex]) {
+        if (annotation instanceof Param) {
+          hasParamAnnotation = true;
+          name = ((Param) annotation).value();
+          break;
+        }
+      }
+	return name;
+}
 
   private String getActualParamName(Method method, int paramIndex) {
     return ParamNameUtil.getParamNames(method).get(paramIndex);
@@ -154,20 +165,30 @@ public class ParamNameResolver {
    */
   public static Object wrapToMapIfCollection(Object object, String actualParamName) {
     if (object instanceof Collection) {
-      ParamMap<Object> map = new ParamMap<>();
-      map.put("collection", object);
-      if (object instanceof List) {
-        map.put("list", object);
-      }
+      ParamMap<Object> map = wrapToMapIfCollection_extracted1(object);
       Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
       return map;
     } else if (object != null && object.getClass().isArray()) {
-      ParamMap<Object> map = new ParamMap<>();
-      map.put("array", object);
-      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+      ParamMap<Object> map = wrapToMapIfCollection_extracted2(object, actualParamName);
       return map;
     }
     return object;
   }
+
+private static ParamMap<Object> wrapToMapIfCollection_extracted2(Object object, String actualParamName) {
+	ParamMap<Object> map = new ParamMap<>();
+      map.put("array", object);
+      Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
+	return map;
+}
+
+private static ParamMap<Object> wrapToMapIfCollection_extracted1(Object object) {
+	ParamMap<Object> map = new ParamMap<>();
+      map.put("collection", object);
+      if (object instanceof List) {
+        map.put("list", object);
+      }
+	return map;
+}
 
 }

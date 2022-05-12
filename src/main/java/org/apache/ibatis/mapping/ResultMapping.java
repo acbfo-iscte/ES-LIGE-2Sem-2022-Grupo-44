@@ -133,15 +133,10 @@ public class ResultMapping {
     }
 
     public ResultMapping build() {
-      // lock down collections
-      resultMapping.flags = Collections.unmodifiableList(resultMapping.flags);
-      resultMapping.composites = Collections.unmodifiableList(resultMapping.composites);
-      resolveTypeHandler();
-      validate();
-      return resultMapping;
+      return resultMapping.build(this);
     }
 
-    private void validate() {
+    public void validate() {
       // Issue #697: cannot define both nestedQueryId and nestedResultMapId
       if (resultMapping.nestedQueryId != null && resultMapping.nestedResultMapId != null) {
         throw new IllegalStateException("Cannot define both nestedQueryId and nestedResultMapId in property " + resultMapping.property);
@@ -154,28 +149,24 @@ public class ResultMapping {
       if (resultMapping.nestedResultMapId == null && resultMapping.column == null && resultMapping.composites.isEmpty()) {
         throw new IllegalStateException("Mapping is missing column attribute for property " + resultMapping.property);
       }
-      if (resultMapping.getResultSet() != null) {
-        int numColumns = 0;
-        if (resultMapping.column != null) {
-          numColumns = resultMapping.column.split(",").length;
-        }
-        int numForeignColumns = 0;
-        if (resultMapping.foreignColumn != null) {
-          numForeignColumns = resultMapping.foreignColumn.split(",").length;
-        }
-        if (numColumns != numForeignColumns) {
-          throw new IllegalStateException("There should be the same number of columns and foreignColumns in property " + resultMapping.property);
-        }
-      }
+      validate_extracted1();
     }
 
-    private void resolveTypeHandler() {
-      if (resultMapping.typeHandler == null && resultMapping.javaType != null) {
-        Configuration configuration = resultMapping.configuration;
-        TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-        resultMapping.typeHandler = typeHandlerRegistry.getTypeHandler(resultMapping.javaType, resultMapping.jdbcType);
-      }
-    }
+	private void validate_extracted1() {
+		if (resultMapping.getResultSet() != null) {
+		    int numColumns = 0;
+		    if (resultMapping.column != null) {
+		      numColumns = resultMapping.column.split(",").length;
+		    }
+		    int numForeignColumns = 0;
+		    if (resultMapping.foreignColumn != null) {
+		      numForeignColumns = resultMapping.foreignColumn.split(",").length;
+		    }
+		    if (numColumns != numForeignColumns) {
+		      throw new IllegalStateException("There should be the same number of columns and foreignColumns in property " + resultMapping.property);
+		    }
+		  }
+	}
 
     public Builder column(String column) {
       resultMapping.column = column;
@@ -301,5 +292,21 @@ public class ResultMapping {
     sb.append('}');
     return sb.toString();
   }
+
+public void resolveTypeHandler() {
+	if (this.typeHandler == null && this.javaType != null) {
+		Configuration configuration = this.configuration;
+		TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+		this.typeHandler = typeHandlerRegistry.getTypeHandler(this.javaType, this.jdbcType);
+	}
+}
+
+public ResultMapping build(Builder builder) {
+	this.flags = Collections.unmodifiableList(this.flags);
+	this.composites = Collections.unmodifiableList(this.composites);
+	resolveTypeHandler();
+	builder.validate();
+	return this;
+}
 
 }

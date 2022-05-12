@@ -100,7 +100,7 @@ public class ParameterMapping {
     }
 
     public ParameterMapping build() {
-      resolveTypeHandler();
+      parameterMapping.resolveTypeHandler();
       validate();
       return parameterMapping;
     }
@@ -118,14 +118,6 @@ public class ParameterMapping {
             + parameterMapping.property + "'. It was either not specified and/or could not be found for the javaType ("
             + parameterMapping.javaType.getName() + ") : jdbcType (" + parameterMapping.jdbcType + ") combination.");
         }
-      }
-    }
-
-    private void resolveTypeHandler() {
-      if (parameterMapping.typeHandler == null && parameterMapping.javaType != null) {
-        Configuration configuration = parameterMapping.configuration;
-        TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-        parameterMapping.typeHandler = typeHandlerRegistry.getTypeHandler(parameterMapping.javaType, parameterMapping.jdbcType);
       }
     }
 
@@ -223,4 +215,12 @@ public class ParameterMapping {
     sb.append('}');
     return sb.toString();
   }
+
+public void resolveTypeHandler() {
+	if (this.typeHandler == null && this.javaType != null) {
+		Configuration configuration = this.configuration;
+		TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+		this.typeHandler = typeHandlerRegistry.getTypeHandler(this.javaType, this.jdbcType);
+	}
+}
 }

@@ -40,12 +40,7 @@ public class Discriminator {
     }
 
     public Discriminator build() {
-      assert discriminator.resultMapping != null;
-      assert discriminator.discriminatorMap != null;
-      assert !discriminator.discriminatorMap.isEmpty();
-      //lock down map
-      discriminator.discriminatorMap = Collections.unmodifiableMap(discriminator.discriminatorMap);
-      return discriminator;
+      return discriminator.build();
     }
   }
 
@@ -60,5 +55,13 @@ public class Discriminator {
   public String getMapIdFor(String s) {
     return discriminatorMap.get(s);
   }
+
+public Discriminator build() {
+	assert this.resultMapping != null;
+	assert this.discriminatorMap != null;
+	assert !this.discriminatorMap.isEmpty();
+	this.discriminatorMap = Collections.unmodifiableMap(this.discriminatorMap);
+	return this;
+}
 
 }

@@ -17,6 +17,7 @@ package org.apache.ibatis.reflection.factory;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,31 +56,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
   private  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
-      Constructor<T> constructor;
-      if (constructorArgTypes == null || constructorArgs == null) {
-        constructor = type.getDeclaredConstructor();
-        try {
-          return constructor.newInstance();
-        } catch (IllegalAccessException e) {
-          if (Reflector.canControlMemberAccessible()) {
-            constructor.setAccessible(true);
-            return constructor.newInstance();
-          } else {
-            throw e;
-          }
-        }
-      }
-      constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
-      try {
-        return constructor.newInstance(constructorArgs.toArray(new Object[0]));
-      } catch (IllegalAccessException e) {
-        if (Reflector.canControlMemberAccessible()) {
-          constructor.setAccessible(true);
-          return constructor.newInstance(constructorArgs.toArray(new Object[0]));
-        } else {
-          throw e;
-        }
-      }
+      return instantiateClass_extracted1(type, constructorArgTypes, constructorArgs);
     } catch (Exception e) {
       String argTypes = Optional.ofNullable(constructorArgTypes).orElseGet(Collections::emptyList)
           .stream().map(Class::getSimpleName).collect(Collectors.joining(","));
@@ -88,6 +65,45 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
       throw new ReflectionException("Error instantiating " + type + " with invalid types (" + argTypes + ") or values (" + argValues + "). Cause: " + e, e);
     }
   }
+
+private <T> T instantiateClass_extracted1(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs)
+		throws NoSuchMethodException, InstantiationException, InvocationTargetException, IllegalAccessException {
+	Constructor<T> constructor;
+      if (constructorArgTypes == null || constructorArgs == null) {
+        constructor = type.getDeclaredConstructor();
+        try {
+          return constructor.newInstance();
+        } catch (IllegalAccessException e) {
+          return instantiateClass_extracted3(constructor, e);
+        }
+      }
+      constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
+      try {
+        return constructor.newInstance(constructorArgs.toArray(new Object[0]));
+      } catch (IllegalAccessException e) {
+        return instantiateClass_extracted2(constructorArgs, constructor, e);
+      }
+}
+
+private <T> T instantiateClass_extracted3(Constructor<T> constructor, IllegalAccessException e)
+		throws InstantiationException, IllegalAccessException, InvocationTargetException {
+	if (Reflector.canControlMemberAccessible()) {
+	    constructor.setAccessible(true);
+	    return constructor.newInstance();
+	  } else {
+	    throw e;
+	  }
+}
+
+private <T> T instantiateClass_extracted2(List<Object> constructorArgs, Constructor<T> constructor,
+		IllegalAccessException e) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+	if (Reflector.canControlMemberAccessible()) {
+	  constructor.setAccessible(true);
+	  return constructor.newInstance(constructorArgs.toArray(new Object[0]));
+	} else {
+	  throw e;
+	}
+}
 
   protected Class<?> resolveInterface(Class<?> type) {
     Class<?> classToCreate;
