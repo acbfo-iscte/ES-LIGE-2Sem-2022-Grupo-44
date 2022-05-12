@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -43,7 +43,12 @@ public class GenericTokenParser {
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
     StringBuilder expression = null;
-    do {
+    return parse_extracted1(text, start, src, offset, builder, expression);
+  }
+
+private String parse_extracted1(String text, int start, char[] src, int offset, final StringBuilder builder,
+		StringBuilder expression) {
+	do {
       if (start > 0 && src[start - 1] == '\\') {
         // this open token is escaped. remove the backslash and continue.
         builder.append(src, offset, start - offset - 1).append(openToken);
@@ -84,5 +89,5 @@ public class GenericTokenParser {
       builder.append(src, offset, src.length - offset);
     }
     return builder.toString();
-  }
+}
 }

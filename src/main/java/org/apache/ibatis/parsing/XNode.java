@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2022 the original author or authors.
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -78,7 +78,13 @@ public class XNode {
     StringBuilder builder = new StringBuilder();
     XNode current = this;
     while (current != null) {
-      if (current != this) {
+      current = getValueBasedIdentifier1_extracted(builder, current);
+    }
+    return builder.toString();
+  }
+
+private XNode getValueBasedIdentifier1_extracted(StringBuilder builder, XNode current) {
+	if (current != this) {
         builder.insert(0, "_");
       }
       String value = current.getStringAttribute("id",
@@ -93,9 +99,8 @@ public class XNode {
       }
       builder.insert(0, current.getName());
       current = current.getParent();
-    }
-    return builder.toString();
-  }
+	return current;
+}
 
   public String evalString(String expression) {
     return xpathParser.evalString(node, expression);
@@ -298,7 +303,11 @@ public class XNode {
       builder.append("\"");
     }
     List<XNode> children = getChildren();
-    if (!children.isEmpty()) {
+    toString_extracted1(builder, level, children);
+  }
+
+private void toString_extracted1(StringBuilder builder, int level, List<XNode> children) {
+	if (!children.isEmpty()) {
       builder.append(">\n");
       for (XNode child : children) {
         indent(builder, level + 1);
@@ -319,7 +328,7 @@ public class XNode {
       indent(builder, level);
     }
     builder.append("\n");
-  }
+}
 
   private void indent(StringBuilder builder, int level) {
     for (int i = 0; i < level; i++) {
