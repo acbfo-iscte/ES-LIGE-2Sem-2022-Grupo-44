@@ -82,12 +82,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
-        if (textSqlNode.isDynamic()) {
-          contents.add(textSqlNode);
-          isDynamic = true;
-        } else {
-          contents.add(new StaticTextSqlNode(data));
-        }
+        parseDynamicTags_extracted1(contents, data, textSqlNode);
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
@@ -100,6 +95,15 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
     return new MixedSqlNode(contents);
   }
+
+private void parseDynamicTags_extracted1(List<SqlNode> contents, String data, TextSqlNode textSqlNode) {
+	if (textSqlNode.isDynamic()) {
+	  contents.add(textSqlNode);
+	  isDynamic = true;
+	} else {
+	  contents.add(new StaticTextSqlNode(data));
+	}
+}
 
   private interface NodeHandler {
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);

@@ -73,7 +73,15 @@ public class ForEachSqlNode implements SqlNode {
     boolean first = true;
     applyOpen(context);
     int i = 0;
-    for (Object o : iterable) {
+    context = apply_extracted1(context, iterable, first, i);
+    applyClose(context);
+    context.getBindings().remove(item);
+    context.getBindings().remove(index);
+    return true;
+  }
+
+private DynamicContext apply_extracted1(DynamicContext context, final Iterable<?> iterable, boolean first, int i) {
+	for (Object o : iterable) {
       DynamicContext oldContext = context;
       if (first || separator == null) {
         context = new PrefixedContext(context, "");
@@ -81,7 +89,19 @@ public class ForEachSqlNode implements SqlNode {
         context = new PrefixedContext(context, separator);
       }
       int uniqueNumber = context.getUniqueNumber();
-      // Issue #709
+      apply_extracted2(context, i, o, uniqueNumber);
+      contents.apply(new FilteredDynamicContext(configuration, context, index, item, uniqueNumber));
+      if (first) {
+        first = !((PrefixedContext) context).isPrefixApplied();
+      }
+      context = oldContext;
+      i++;
+    }
+	return context;
+}
+
+private void apply_extracted2(DynamicContext context, int i, Object o, int uniqueNumber) {
+	// Issue #709
       if (o instanceof Map.Entry) {
         @SuppressWarnings("unchecked")
         Map.Entry<Object, Object> mapEntry = (Map.Entry<Object, Object>) o;
@@ -91,18 +111,7 @@ public class ForEachSqlNode implements SqlNode {
         applyIndex(context, i, uniqueNumber);
         applyItem(context, o, uniqueNumber);
       }
-      contents.apply(new FilteredDynamicContext(configuration, context, index, item, uniqueNumber));
-      if (first) {
-        first = !((PrefixedContext) context).isPrefixApplied();
-      }
-      context = oldContext;
-      i++;
-    }
-    applyClose(context);
-    context.getBindings().remove(item);
-    context.getBindings().remove(index);
-    return true;
-  }
+}
 
   private void applyIndex(DynamicContext context, Object o, int i) {
     if (index != null) {
