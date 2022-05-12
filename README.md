@@ -12,7 +12,7 @@ Simplicity is the biggest advantage of the MyBatis data mapper over object relat
 Grupo 44
 ----------
 
-* José Miguel Correia   92722    jmvdr@iscte-iul.pt    jmvdr-iscte
+* Jose Miguel Correia   92722    jmvdr@iscte-iul.pt    jmvdr-iscte
 * Afonso Figueiredo     92509    acbfo@iscte-iul.pt    acbfo-iscte
 * Tiago Batista         92588    tmrba@iscte-iul.pt    tmrba-iscte
 * Tomás Santos          83018    thcam@iscte-iul.pt    thcam-iscte
