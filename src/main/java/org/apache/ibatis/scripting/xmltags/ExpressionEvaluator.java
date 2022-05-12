@@ -66,12 +66,7 @@ public class ExpressionEvaluator {
       // the array may be primitive, so Arrays.asList() may throw
       // a ClassCastException (issue 209).  Do the work manually
       // Curse primitives! :) (JGB)
-      int size = Array.getLength(value);
-      List<Object> answer = new ArrayList<>();
-      for (int i = 0; i < size; i++) {
-        Object o = Array.get(value, i);
-        answer.add(o);
-      }
+      List<Object> answer = evaluateIterable_extracted1(value);
       return answer;
     }
     if (value instanceof Map) {
@@ -79,5 +74,15 @@ public class ExpressionEvaluator {
     }
     throw new BuilderException("Error evaluating expression '" + expression + "'.  Return value (" + value + ") was not iterable.");
   }
+
+private List<Object> evaluateIterable_extracted1(Object value) {
+	int size = Array.getLength(value);
+      List<Object> answer = new ArrayList<>();
+      for (int i = 0; i < size; i++) {
+        Object o = Array.get(value, i);
+        answer.add(o);
+      }
+	return answer;
+}
 
 }

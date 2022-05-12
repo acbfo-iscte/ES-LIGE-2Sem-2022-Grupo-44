@@ -68,29 +68,40 @@ public class DefaultParameterHandler implements ParameterHandler {
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           Object value;
           String propertyName = parameterMapping.getProperty();
-          if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
-            value = boundSql.getAdditionalParameter(propertyName);
-          } else if (parameterObject == null) {
-            value = null;
-          } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
-            value = parameterObject;
-          } else {
-            MetaObject metaObject = configuration.newMetaObject(parameterObject);
-            value = metaObject.getValue(propertyName);
-          }
+          value = setParameters_extracted1(propertyName);
           TypeHandler typeHandler = parameterMapping.getTypeHandler();
           JdbcType jdbcType = parameterMapping.getJdbcType();
-          if (value == null && jdbcType == null) {
-            jdbcType = configuration.getJdbcTypeForNull();
-          }
-          try {
-            typeHandler.setParameter(ps, i + 1, value, jdbcType);
-          } catch (TypeException | SQLException e) {
-            throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
-          }
+          setParameters_extracted2(ps, i, parameterMapping, value, typeHandler, jdbcType);
         }
       }
     }
   }
+
+private void setParameters_extracted2(PreparedStatement ps, int i, ParameterMapping parameterMapping, Object value,
+		TypeHandler typeHandler, JdbcType jdbcType) {
+	if (value == null && jdbcType == null) {
+	    jdbcType = configuration.getJdbcTypeForNull();
+	  }
+	  try {
+	    typeHandler.setParameter(ps, i + 1, value, jdbcType);
+	  } catch (TypeException | SQLException e) {
+	    throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
+	  }
+}
+
+private Object setParameters_extracted1(String propertyName) {
+	Object value;
+	if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
+	    value = boundSql.getAdditionalParameter(propertyName);
+	  } else if (parameterObject == null) {
+	    value = null;
+	  } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+	    value = parameterObject;
+	  } else {
+	    MetaObject metaObject = configuration.newMetaObject(parameterObject);
+	    value = metaObject.getValue(propertyName);
+	  }
+	return value;
+}
 
 }

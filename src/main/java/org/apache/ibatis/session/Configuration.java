@@ -182,18 +182,7 @@ public class Configuration {
   }
 
   public Configuration() {
-    typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
-    typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
-
-    typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
-    typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
-    typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
-
-    typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
-    typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
-    typeAliasRegistry.registerAlias("LRU", LruCache.class);
-    typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
-    typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
+    configuration_extracted1();
 
     typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
 
@@ -214,6 +203,21 @@ public class Configuration {
     languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
     languageRegistry.register(RawLanguageDriver.class);
   }
+
+private void configuration_extracted1() {
+	typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+    typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
+
+    typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
+    typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
+    typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
+
+    typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+    typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
+    typeAliasRegistry.registerAlias("LRU", LruCache.class);
+    typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
+    typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
+}
 
   public String getLogPrefix() {
     return logPrefix;
@@ -893,12 +897,7 @@ public class Configuration {
    * statement validation.
    */
   protected void buildAllStatements() {
-    parsePendingResultMaps();
-    if (!incompleteCacheRefs.isEmpty()) {
-      synchronized (incompleteCacheRefs) {
-        incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
-      }
-    }
+    buildAllStatements_extracted();
     if (!incompleteStatements.isEmpty()) {
       synchronized (incompleteStatements) {
         incompleteStatements.removeIf(x -> {
@@ -917,6 +916,15 @@ public class Configuration {
     }
   }
 
+private void buildAllStatements_extracted() {
+	parsePendingResultMaps();
+    if (!incompleteCacheRefs.isEmpty()) {
+      synchronized (incompleteCacheRefs) {
+        incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
+      }
+    }
+}
+
   private void parsePendingResultMaps() {
     if (incompleteResultMaps.isEmpty()) {
       return;
@@ -924,7 +932,17 @@ public class Configuration {
     synchronized (incompleteResultMaps) {
       boolean resolved;
       IncompleteElementException ex = null;
-      do {
+      ex = parsePendingResultMaps_extracted(ex);
+      if (!incompleteResultMaps.isEmpty() && ex != null) {
+        // At least one result map is unresolvable.
+        throw ex;
+      }
+    }
+  }
+
+private IncompleteElementException parsePendingResultMaps_extracted(IncompleteElementException ex) {
+	boolean resolved;
+	do {
         resolved = false;
         Iterator<ResultMapResolver> iterator = incompleteResultMaps.iterator();
         while (iterator.hasNext()) {
@@ -937,12 +955,8 @@ public class Configuration {
           }
         }
       } while (resolved);
-      if (!incompleteResultMaps.isEmpty() && ex != null) {
-        // At least one result map is unresolvable.
-        throw ex;
-      }
-    }
-  }
+	return ex;
+}
 
   /**
    * Extracts namespace from fully qualified statement id.
