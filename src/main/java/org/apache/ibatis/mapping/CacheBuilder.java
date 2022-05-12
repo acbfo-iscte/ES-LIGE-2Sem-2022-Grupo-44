@@ -117,7 +117,14 @@ public class CacheBuilder {
 
   private Cache setStandardDecorators(Cache cache) {
     try {
-      MetaObject metaCache = SystemMetaObject.forObject(cache);
+      return setStandardDecorators_extracted(cache);
+    } catch (Exception e) {
+      throw new CacheException("Error building standard cache decorators.  Cause: " + e, e);
+    }
+  }
+
+private Cache setStandardDecorators_extracted(Cache cache) {
+	MetaObject metaCache = SystemMetaObject.forObject(cache);
       if (size != null && metaCache.hasSetter("size")) {
         metaCache.setValue("size", size);
       }
@@ -134,10 +141,7 @@ public class CacheBuilder {
         cache = new BlockingCache(cache);
       }
       return cache;
-    } catch (Exception e) {
-      throw new CacheException("Error building standard cache decorators.  Cause: " + e, e);
-    }
-  }
+}
 
   private void setCacheProperties(Cache cache) {
     if (properties != null) {
@@ -145,35 +149,7 @@ public class CacheBuilder {
       for (Map.Entry<Object, Object> entry : properties.entrySet()) {
         String name = (String) entry.getKey();
         String value = (String) entry.getValue();
-        if (metaCache.hasSetter(name)) {
-          Class<?> type = metaCache.getSetterType(name);
-          if (String.class == type) {
-            metaCache.setValue(name, value);
-          } else if (int.class == type
-              || Integer.class == type) {
-            metaCache.setValue(name, Integer.valueOf(value));
-          } else if (long.class == type
-              || Long.class == type) {
-            metaCache.setValue(name, Long.valueOf(value));
-          } else if (short.class == type
-              || Short.class == type) {
-            metaCache.setValue(name, Short.valueOf(value));
-          } else if (byte.class == type
-              || Byte.class == type) {
-            metaCache.setValue(name, Byte.valueOf(value));
-          } else if (float.class == type
-              || Float.class == type) {
-            metaCache.setValue(name, Float.valueOf(value));
-          } else if (boolean.class == type
-              || Boolean.class == type) {
-            metaCache.setValue(name, Boolean.valueOf(value));
-          } else if (double.class == type
-              || Double.class == type) {
-            metaCache.setValue(name, Double.valueOf(value));
-          } else {
-            throw new CacheException("Unsupported property type for cache: '" + name + "' of type " + type);
-          }
-        }
+        setCacheProperties_extracted1(metaCache, name, value);
       }
     }
     if (InitializingObject.class.isAssignableFrom(cache.getClass())) {
@@ -185,6 +161,42 @@ public class CacheBuilder {
       }
     }
   }
+
+private void setCacheProperties_extracted1(MetaObject metaCache, String name, String value) {
+	if (metaCache.hasSetter(name)) {
+	  Class<?> type = metaCache.getSetterType(name);
+	  setCacheProperties_extracted2(metaCache, name, value, type);
+	}
+}
+
+private void setCacheProperties_extracted2(MetaObject metaCache, String name, String value, Class<?> type) {
+	if (String.class == type) {
+	    metaCache.setValue(name, value);
+	  } else if (int.class == type
+	      || Integer.class == type) {
+	    metaCache.setValue(name, Integer.valueOf(value));
+	  } else if (long.class == type
+	      || Long.class == type) {
+	    metaCache.setValue(name, Long.valueOf(value));
+	  } else if (short.class == type
+	      || Short.class == type) {
+	    metaCache.setValue(name, Short.valueOf(value));
+	  } else if (byte.class == type
+	      || Byte.class == type) {
+	    metaCache.setValue(name, Byte.valueOf(value));
+	  } else if (float.class == type
+	      || Float.class == type) {
+	    metaCache.setValue(name, Float.valueOf(value));
+	  } else if (boolean.class == type
+	      || Boolean.class == type) {
+	    metaCache.setValue(name, Boolean.valueOf(value));
+	  } else if (double.class == type
+	      || Double.class == type) {
+	    metaCache.setValue(name, Double.valueOf(value));
+	  } else {
+	    throw new CacheException("Unsupported property type for cache: '" + name + "' of type " + type);
+	  }
+}
 
   private Cache newBaseCacheInstance(Class<? extends Cache> cacheClass, String id) {
     Constructor<? extends Cache> cacheConstructor = getBaseCacheConstructor(cacheClass);

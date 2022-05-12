@@ -34,16 +34,7 @@ public final class PropertyCopier {
       final Field[] fields = parent.getDeclaredFields();
       for (Field field : fields) {
         try {
-          try {
-            field.set(destinationBean, field.get(sourceBean));
-          } catch (IllegalAccessException e) {
-            if (Reflector.canControlMemberAccessible()) {
-              field.setAccessible(true);
-              field.set(destinationBean, field.get(sourceBean));
-            } else {
-              throw e;
-            }
-          }
+          copyBeanProperties_extracted1(sourceBean, destinationBean, field);
         } catch (Exception e) {
           // Nothing useful to do, will only fail on final fields, which will be ignored.
         }
@@ -51,5 +42,19 @@ public final class PropertyCopier {
       parent = parent.getSuperclass();
     }
   }
+
+private static void copyBeanProperties_extracted1(Object sourceBean, Object destinationBean, Field field)
+		throws IllegalAccessException {
+	try {
+	    field.set(destinationBean, field.get(sourceBean));
+	  } catch (IllegalAccessException e) {
+	    if (Reflector.canControlMemberAccessible()) {
+	      field.setAccessible(true);
+	      field.set(destinationBean, field.get(sourceBean));
+	    } else {
+	      throw e;
+	    }
+	  }
+}
 
 }

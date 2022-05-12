@@ -89,36 +89,7 @@ public class ResultMap {
       resultMap.constructorResultMappings = new ArrayList<>();
       resultMap.propertyResultMappings = new ArrayList<>();
       final List<String> constructorArgNames = new ArrayList<>();
-      for (ResultMapping resultMapping : resultMap.resultMappings) {
-        resultMap.hasNestedQueries = resultMap.hasNestedQueries || resultMapping.getNestedQueryId() != null;
-        resultMap.hasNestedResultMaps = resultMap.hasNestedResultMaps || (resultMapping.getNestedResultMapId() != null && resultMapping.getResultSet() == null);
-        final String column = resultMapping.getColumn();
-        if (column != null) {
-          resultMap.mappedColumns.add(column.toUpperCase(Locale.ENGLISH));
-        } else if (resultMapping.isCompositeResult()) {
-          for (ResultMapping compositeResultMapping : resultMapping.getComposites()) {
-            final String compositeColumn = compositeResultMapping.getColumn();
-            if (compositeColumn != null) {
-              resultMap.mappedColumns.add(compositeColumn.toUpperCase(Locale.ENGLISH));
-            }
-          }
-        }
-        final String property = resultMapping.getProperty();
-        if (property != null) {
-          resultMap.mappedProperties.add(property);
-        }
-        if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
-          resultMap.constructorResultMappings.add(resultMapping);
-          if (resultMapping.getProperty() != null) {
-            constructorArgNames.add(resultMapping.getProperty());
-          }
-        } else {
-          resultMap.propertyResultMappings.add(resultMapping);
-        }
-        if (resultMapping.getFlags().contains(ResultFlag.ID)) {
-          resultMap.idResultMappings.add(resultMapping);
-        }
-      }
+      build_extracted1(constructorArgNames);
       if (resultMap.idResultMappings.isEmpty()) {
         resultMap.idResultMappings.addAll(resultMap.resultMappings);
       }
@@ -144,6 +115,47 @@ public class ResultMap {
       resultMap.mappedColumns = Collections.unmodifiableSet(resultMap.mappedColumns);
       return resultMap;
     }
+
+	private void build_extracted1(final List<String> constructorArgNames) {
+		for (ResultMapping resultMapping : resultMap.resultMappings) {
+		    resultMap.hasNestedQueries = resultMap.hasNestedQueries || resultMapping.getNestedQueryId() != null;
+		    resultMap.hasNestedResultMaps = resultMap.hasNestedResultMaps || (resultMapping.getNestedResultMapId() != null && resultMapping.getResultSet() == null);
+		    final String column = resultMapping.getColumn();
+		    if (column != null) {
+		      resultMap.mappedColumns.add(column.toUpperCase(Locale.ENGLISH));
+		    } else if (resultMapping.isCompositeResult()) {
+		      build_extracted2(resultMapping);
+		    }
+		    final String property = resultMapping.getProperty();
+		    if (property != null) {
+		      resultMap.mappedProperties.add(property);
+		    }
+		    build_extracted3(constructorArgNames, resultMapping);
+		    if (resultMapping.getFlags().contains(ResultFlag.ID)) {
+		      resultMap.idResultMappings.add(resultMapping);
+		    }
+		  }
+	}
+
+	private void build_extracted3(final List<String> constructorArgNames, ResultMapping resultMapping) {
+		if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
+		  resultMap.constructorResultMappings.add(resultMapping);
+		  if (resultMapping.getProperty() != null) {
+		    constructorArgNames.add(resultMapping.getProperty());
+		  }
+		} else {
+		  resultMap.propertyResultMappings.add(resultMapping);
+		}
+	}
+
+	private void build_extracted2(ResultMapping resultMapping) {
+		for (ResultMapping compositeResultMapping : resultMapping.getComposites()) {
+		    final String compositeColumn = compositeResultMapping.getColumn();
+		    if (compositeColumn != null) {
+		      resultMap.mappedColumns.add(compositeColumn.toUpperCase(Locale.ENGLISH));
+		    }
+		  }
+	}
 
     private List<String> argNamesOfMatchingConstructor(List<String> constructorArgNames) {
       Constructor<?>[] constructors = resultMap.type.getDeclaredConstructors();
@@ -184,26 +196,32 @@ public class ResultMap {
       List<String> actualParamNames = null;
       final Annotation[][] paramAnnotations = constructor.getParameterAnnotations();
       int paramCount = paramAnnotations.length;
-      for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
-        String name = null;
-        for (Annotation annotation : paramAnnotations[paramIndex]) {
-          if (annotation instanceof Param) {
-            name = ((Param) annotation).value();
-            break;
-          }
-        }
-        if (name == null && resultMap.configuration.isUseActualParamName()) {
-          if (actualParamNames == null) {
-            actualParamNames = ParamNameUtil.getParamNames(constructor);
-          }
-          if (actualParamNames.size() > paramIndex) {
-            name = actualParamNames.get(paramIndex);
-          }
-        }
-        paramNames.add(name != null ? name : "arg" + paramIndex);
-      }
+      getArgNames_extracted(constructor, paramNames, actualParamNames, paramAnnotations, paramCount);
       return paramNames;
     }
+
+	private void getArgNames_extracted(Constructor<?> constructor, List<String> paramNames, List<String> actualParamNames,
+			final Annotation[][] paramAnnotations, int paramCount) {
+		for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+		    String name = null;
+		    for (Annotation annotation : paramAnnotations[paramIndex]) {
+		      if (annotation instanceof Param) {
+		        name = ((Param) annotation).value();
+
+		        break;
+		      }
+		    }
+		    if (name == null && resultMap.configuration.isUseActualParamName()) {
+		      if (actualParamNames == null) {
+		        actualParamNames = ParamNameUtil.getParamNames(constructor);
+		      }
+		      if (actualParamNames.size() > paramIndex) {
+		        name = actualParamNames.get(paramIndex);
+		      }
+		    }
+		    paramNames.add(name != null ? name : "arg" + paramIndex);
+		  }
+	}
   }
 
   public String getId() {
