@@ -32,46 +32,27 @@ import org.w3c.dom.NodeList;
  */
 public class XNode {
 
-  private final Node node;
-  private final String name;
-  private final String body;
+  private XNodeProduct2 xNodeProduct2;
+private XNodeProduct xNodeProduct;
+private final String name;
   private final Properties attributes;
-  private final Properties variables;
-  private final XPathParser xpathParser;
-
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
-    this.xpathParser = xpathParser;
-    this.node = node;
-    this.name = node.getNodeName();
-    this.variables = variables;
-    this.attributes = parseAttributes(node);
-    this.body = parseBody(node);
+    this.xNodeProduct = new XNodeProduct(xpathParser, node, variables);
+	this.name = node.getNodeName();
+    this.attributes = xNodeProduct.parseAttributes(node);
+	this.xNodeProduct2 = new XNodeProduct2(xNodeProduct.parseBody(node));
   }
 
   public XNode newXNode(Node node) {
-    return new XNode(xpathParser, node, variables);
+    return xNodeProduct.newXNode(node);
   }
 
   public XNode getParent() {
-    Node parent = node.getParentNode();
-    if (!(parent instanceof Element)) {
-      return null;
-    } else {
-      return new XNode(xpathParser, parent, variables);
-    }
+    return xNodeProduct.getParent();
   }
 
   public String getPath() {
-    StringBuilder builder = new StringBuilder();
-    Node current = node;
-    while (current instanceof Element) {
-      if (current != node) {
-        builder.insert(0, "/");
-      }
-      builder.insert(0, current.getNodeName());
-      current = current.getParentNode();
-    }
-    return builder.toString();
+    return xNodeProduct.getPath();
   }
 
   public String getValueBasedIdentifier() {
@@ -103,27 +84,27 @@ private XNode getValueBasedIdentifier1_extracted(StringBuilder builder, XNode cu
 }
 
   public String evalString(String expression) {
-    return xpathParser.evalString(node, expression);
+    return xNodeProduct.getXpathParser().evalString(xNodeProduct.getNode(), expression);
   }
 
   public Boolean evalBoolean(String expression) {
-    return xpathParser.evalBoolean(node, expression);
+    return xNodeProduct.getXpathParser().evalBoolean(xNodeProduct.getNode(), expression);
   }
 
   public Double evalDouble(String expression) {
-    return xpathParser.evalDouble(node, expression);
+    return xNodeProduct.getXpathParser().evalDouble(xNodeProduct.getNode(), expression);
   }
 
   public List<XNode> evalNodes(String expression) {
-    return xpathParser.evalNodes(node, expression);
+    return xNodeProduct.getXpathParser().evalNodes(xNodeProduct.getNode(), expression);
   }
 
   public XNode evalNode(String expression) {
-    return xpathParser.evalNode(node, expression);
+    return xNodeProduct.getXpathParser().evalNode(xNodeProduct.getNode(), expression);
   }
 
   public Node getNode() {
-    return node;
+    return xNodeProduct.getNode();
   }
 
   public String getName() {
@@ -131,51 +112,51 @@ private XNode getValueBasedIdentifier1_extracted(StringBuilder builder, XNode cu
   }
 
   public String getStringBody() {
-    return getStringBody(null);
+    return xNodeProduct2.getStringBody(null);
   }
 
   public String getStringBody(String def) {
-    return body == null ? def : body;
+    return xNodeProduct2.getStringBody(def);
   }
 
   public Boolean getBooleanBody() {
-    return getBooleanBody(null);
+    return xNodeProduct2.getBooleanBody(null);
   }
 
   public Boolean getBooleanBody(Boolean def) {
-    return body == null ? def : Boolean.valueOf(body);
+    return xNodeProduct2.getBooleanBody(def);
   }
 
   public Integer getIntBody() {
-    return getIntBody(null);
+    return xNodeProduct2.getIntBody(null);
   }
 
   public Integer getIntBody(Integer def) {
-    return body == null ? def : Integer.valueOf(body);
+    return xNodeProduct2.getIntBody(def);
   }
 
   public Long getLongBody() {
-    return getLongBody(null);
+    return xNodeProduct2.getLongBody(null);
   }
 
   public Long getLongBody(Long def) {
-    return body == null ? def : Long.valueOf(body);
+    return xNodeProduct2.getLongBody(def);
   }
 
   public Double getDoubleBody() {
-    return getDoubleBody(null);
+    return xNodeProduct2.getDoubleBody(null);
   }
 
   public Double getDoubleBody(Double def) {
-    return body == null ? def : Double.valueOf(body);
+    return xNodeProduct2.getDoubleBody(def);
   }
 
   public Float getFloatBody() {
-    return getFloatBody(null);
+    return xNodeProduct2.getFloatBody(null);
   }
 
   public Float getFloatBody(Float def) {
-    return body == null ? def : Float.valueOf(body);
+    return xNodeProduct2.getFloatBody(def);
   }
 
   public <T extends Enum<T>> T getEnumAttribute(Class<T> enumType, String name) {
@@ -260,22 +241,12 @@ private XNode getValueBasedIdentifier1_extracted(StringBuilder builder, XNode cu
   }
 
   public List<XNode> getChildren() {
-    List<XNode> children = new ArrayList<>();
-    NodeList nodeList = node.getChildNodes();
-    if (nodeList != null) {
-      for (int i = 0, n = nodeList.getLength(); i < n; i++) {
-        Node node = nodeList.item(i);
-        if (node.getNodeType() == Node.ELEMENT_NODE) {
-          children.add(new XNode(xpathParser, node, variables));
-        }
-      }
-    }
-    return children;
+    return xNodeProduct.getChildren();
   }
 
   public Properties getChildrenAsProperties() {
     Properties properties = new Properties();
-    for (XNode child : getChildren()) {
+    for (XNode child : xNodeProduct.getChildren()) {
       String name = child.getStringAttribute("name");
       String value = child.getStringAttribute("value");
       if (name != null && value != null) {
@@ -302,7 +273,7 @@ private XNode getValueBasedIdentifier1_extracted(StringBuilder builder, XNode cu
       builder.append(entry.getValue());
       builder.append("\"");
     }
-    List<XNode> children = getChildren();
+    List<XNode> children = xNodeProduct.getChildren();
     toString_extracted1(builder, level, children);
   }
 
@@ -317,9 +288,9 @@ private void toString_extracted1(StringBuilder builder, int level, List<XNode> c
       builder.append("</");
       builder.append(name);
       builder.append(">");
-    } else if (body != null) {
+    } else if (xNodeProduct2.getBody() != null) {
       builder.append(">");
-      builder.append(body);
+      builder.append(xNodeProduct2.getBody());
       builder.append("</");
       builder.append(name);
       builder.append(">");
@@ -334,44 +305,6 @@ private void toString_extracted1(StringBuilder builder, int level, List<XNode> c
     for (int i = 0; i < level; i++) {
       builder.append("    ");
     }
-  }
-
-  private Properties parseAttributes(Node n) {
-    Properties attributes = new Properties();
-    NamedNodeMap attributeNodes = n.getAttributes();
-    if (attributeNodes != null) {
-      for (int i = 0; i < attributeNodes.getLength(); i++) {
-        Node attribute = attributeNodes.item(i);
-        String value = PropertyParser.parse(attribute.getNodeValue(), variables);
-        attributes.put(attribute.getNodeName(), value);
-      }
-    }
-    return attributes;
-  }
-
-  private String parseBody(Node node) {
-    String data = getBodyData(node);
-    if (data == null) {
-      NodeList children = node.getChildNodes();
-      for (int i = 0; i < children.getLength(); i++) {
-        Node child = children.item(i);
-        data = getBodyData(child);
-        if (data != null) {
-          break;
-        }
-      }
-    }
-    return data;
-  }
-
-  private String getBodyData(Node child) {
-    if (child.getNodeType() == Node.CDATA_SECTION_NODE
-        || child.getNodeType() == Node.TEXT_NODE) {
-      String data = ((CharacterData) child).getData();
-      data = PropertyParser.parse(data, variables);
-      return data;
-    }
-    return null;
   }
 
 }
